@@ -1,0 +1,12 @@
+{
+  "check_interval": 1200,
+  "stores": {
+    "store1": {
+      "name": "BI",
+      "buy_button_selector": "div.prodBuy a",
+      "buy_button_text": "Купити",
+      "title_selector": "h1[itemprop='name']",
+      "base_url": "https://bi.ua/"
+    }
+  }
+}
