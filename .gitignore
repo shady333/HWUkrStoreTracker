@@ -1,5 +1,6 @@
 # --- 🔐 Конфіденційні файли ---
 telegram_config.json
+.env
 
 # --- 🧾 Логи ---
 *.log
@@ -33,3 +34,5 @@ dist/
 !config.json
 !products.json
 !.github/
+
+
