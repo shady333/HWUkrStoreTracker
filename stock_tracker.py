@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 from telegram import Bot
 import os
+from datetime import datetime
 
 # ---- Налаштування логування ----
 logging.basicConfig(
@@ -13,6 +14,8 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
+
+LAST_CHECK_FILE = "last_check.txt"
 
 # ---- Робота з файлами ----
 def load_json(filename):
@@ -33,6 +36,17 @@ def save_json(filename, data):
             json.dump(data, f, indent=2, ensure_ascii=False)
     except Exception as e:
         logging.error(f"Помилка при збереженні {filename}: {e}")
+
+
+def update_last_check_time():
+    """Оновлює час останньої перевірки у last_check.txt"""
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    try:
+        with open(LAST_CHECK_FILE, "w", encoding="utf-8") as f:
+            f.write(now)
+        logging.info(f"Оновлено last_check.txt: {now}")
+    except Exception as e:
+        logging.error(f"Помилка при записі last_check.txt: {e}")
 
 
 # ---- HTTP-запит ----
@@ -79,7 +93,6 @@ def load_telegram_config():
         logging.info("Telegram-конфіг завантажено з environment")
         return {"token": token, "chat_id": chat_id}
 
-    # fallback: локальний файл
     cfg = load_json("telegram_config.json")
     if cfg and "token" in cfg and "chat_id" in cfg:
         logging.info("Telegram-конфіг завантажено з telegram_config.json")
@@ -129,6 +142,8 @@ async def check_products_once(config, products, telegram_config):
         save_json('products.json', products)
         logging.info("Оновлено products.json")
 
+    update_last_check_time()  # <-- ✅ тут оновлюємо час останньої перевірки
+
 
 # ---- Головна функція ----
 async def main():
@@ -149,7 +164,7 @@ async def main():
         logging.info("✅ Перевірка завершена")
 
         if run_once:
-            break  # GitHub режим — один прохід
+            break
 
         logging.info(f"Очікування {check_interval} секунд перед наступною перевіркою...")
         await asyncio.sleep(check_interval)

@@ -1,17 +1,17 @@
-name: 🛒 Stock Tracker
+name: Stock Tracker
 
 on:
   schedule:
-    # Кожні 30 хвилин з 6:00 до 22:00 UTC (8:00–00:00 за Києвом)
-    - cron: "0,30 6-22 * * *"
-  workflow_dispatch:  # дозволяє запускати вручну
+    # Кожні 30 хв з 6:00 до 22:00
+    - cron: "0,30 6-21 * * *"
+  workflow_dispatch: # можна вручну запустити з GitHub UI
 
 jobs:
-  check_stock:
+  run-tracker:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🔹 Клонування репозиторію
+      - name: 🔽 Checkout репозиторію
         uses: actions/checkout@v4
 
       - name: 🐍 Встановлення Python
@@ -22,20 +22,24 @@ jobs:
       - name: 📦 Встановлення залежностей
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install aiohttp beautifulsoup4 python-telegram-bot==20.3
 
-      - name: 🕵️ Перевірка товарів
+      - name: 🚀 Запуск stock_tracker
         env:
-          RUN_ONCE: "true"                     # один прохід у GitHub режимі
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python stock_tracker.py
-
-      - name: 🧾 Збереження зміненого products.json
-        if: success()
+          RUN_ONCE: "true"
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add products.json || echo "Немає змін"
-          git diff --cached --quiet || git commit -m "🔄 update products.json [auto]"
-          git push
+          python stock_tracker.py
+
+      - name: 📝 Перевірка змін у файлах
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add last_check.txt stock_tracker.log products.json || true
+          if git diff --cached --quiet; then
+            echo "✅ Немає змін — коміт не потрібен"
+          else
+            git commit -m "🕒 Автооновлення статусу товарів"
+            git push
+          fi
