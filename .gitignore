@@ -1,0 +1,35 @@
+# --- 🔐 Конфіденційні файли ---
+telegram_config.json
+
+# --- 🧾 Логи ---
+*.log
+logs/
+__pycache__/
+*.pyc
+
+# --- 🧪 Середовище ---
+.venv/
+venv/
+env/
+ENV/
+
+# --- 🧰 IDE / системні файли ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- 🧮 Дані або тимчасові результати ---
+*.tmp
+*.bak
+*.swp
+
+# --- 📦 Python build ---
+build/
+dist/
+*.egg-info/
+
+# --- 🧾 Не ігноруємо важливі файли ---
+!config.json
+!products.json
+!.github/
